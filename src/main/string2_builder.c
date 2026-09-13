@@ -138,7 +138,7 @@ size_t string2_builder_get_length(string2_builder* builder)
 
 char string2_builder_getchar(string2_builder* builder, size_t index)
 {
-    if(index >= string2_builder_get_length(builder)) return NULL;
+    if(index >= string2_builder_get_length(builder)) return 0;
     return builder->bbuffer[index/BUFFER_SIZE][index%BUFFER_SIZE];
 }
 

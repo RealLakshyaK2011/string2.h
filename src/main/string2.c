@@ -14,6 +14,7 @@ void make_string2(string2 *string, char *cstring)
     while((c = cstring[len]) != '\0') len++;
     len++;
 
+    string->allocated = 0;
     allocate_blocks(string, len, false);
     
     for(int i = 0; i < len; i++)
@@ -40,7 +41,7 @@ void string2_concat_char(string2* string, char c)
     register size_t len = string->length; 
     if(len + 1 > string->allocated)
     {
-        allocate_blocks(string, len + 1, false);
+        allocate_blocks(string, len + 1, true);
     }
 
     string->string[len-1] = c;
@@ -59,7 +60,7 @@ void string2_concat_cstring_auto(string2* string, char* cstring)
 void string2_concat_cstring(string2 *string, char *cstring, size_t length)
 {
     size_t strlen = string->length;
-    if(strlen + length > string->allocated) allocate_blocks(string, length, false);
+    if(strlen + length > string->allocated) allocate_blocks(string, length, true);
     for(int i = 0; i < length; i++)
     {
         string->string[strlen+i-1] = cstring[i];
@@ -73,7 +74,7 @@ void string2_concat_string2(string2 *string, string2 *str2)
     register size_t strlen = string->length;
     if(strlen+ str2->length > string->allocated)
     {
-        allocate_blocks(string, str2->length, false);
+        allocate_blocks(string, str2->length, true);
     }
 
     for(int i = 0; i < str2->length; i++)
