@@ -34,7 +34,7 @@ void string2_builder_append_cstring_auto(string2_builder* builder, char* cstring
 void string2_builder_append_cstring(string2_builder* builder, char* cstring, size_t length);
 void string2_builder_append_string2(string2_builder* builder, string2* str);
 
-char* string2_builder_build_cstring(string2_builder* builder, uint* length);
+char* string2_builder_build_cstring(string2_builder* builder, size_t* length);
 void  string2_builder_build_cstring_to(string2_builder* builder, char* cstring);
 void  string2_builder_build_string2(string2_builder* builder, string2* str);
 

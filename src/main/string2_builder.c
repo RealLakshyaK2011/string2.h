@@ -86,12 +86,12 @@ void string2_builder_append_string2(string2_builder* builder, string2* str)
 }
 
 // Building function
-char* string2_builder_build_cstring(string2_builder* builder, uint* length)
+char* string2_builder_build_cstring(string2_builder* builder, size_t* length)
 {
-    uint l = string2_builder_get_length(builder);
+    size_t l = string2_builder_get_length(builder);
     char* cstr = malloc(sizeof(char) * (l + 1));
     string2_builder_build_cstring_to(builder, cstr);
-    if(length != NULL) *length = l;
+    if(length != NULL) *length = l+1;
     return cstr;
 }
 
@@ -138,7 +138,7 @@ size_t string2_builder_get_length(string2_builder* builder)
 
 char string2_builder_getchar(string2_builder* builder, size_t index)
 {
-    if(index >= string2_builder_get_length(builder)) return 0;
+    if(index >= string2_builder_get_length(builder)) return NULL;
     return builder->bbuffer[index/BUFFER_SIZE][index%BUFFER_SIZE];
 }
 
