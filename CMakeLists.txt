@@ -5,7 +5,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 set(CMAKE_BUILD_TYPE Debug)
 
 add_library(string2.h)
-
 target_sources(string2.h
     PRIVATE
         src/main/string2.c
@@ -18,5 +17,7 @@ target_sources(string2.h
 )
 
 # Tests
-add_executable(test src/test/stringreadtest.c)
-target_link_libraries(test string2.h)
+add_executable(strreadtest src/test/stringreadtest.c)
+add_executable(filereader src/test/filereader.c)
+target_link_libraries(strreadtest string2.h)
+target_link_libraries(filereader string2.h)

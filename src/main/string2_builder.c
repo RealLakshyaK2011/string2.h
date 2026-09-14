@@ -140,12 +140,13 @@ void string2_builder_readword(string2_builder *builder, FILE *stream)
     while(1)
     {
         c = fgetc(stream);
-        if(c == ' ' || c == '\t' || c == '\n') break;
+        if(c == '\n') break;
         if(bufferCR)
         {
             string2_builder_append_char(builder, '\r');
             bufferCR = false;
         }
+        if(c == ' ' || c == '\t' || c == EOF) break;
         if(c == '\r')
         {
             bufferCR = true;
@@ -169,6 +170,7 @@ void string2_builder_readline(string2_builder *builder, FILE *stream)
             string2_builder_append_char(builder, '\r');
             bufferCR = false;
         }
+        if(c == EOF) break;
         if(c == '\r')
         {
             bufferCR = true;

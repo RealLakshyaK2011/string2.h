@@ -93,12 +93,13 @@ void string2_readword(string2 *string, FILE *stream)
     while(1)
     {
         c = fgetc(stream);
-        if(c == ' ' || c == '\t' || c == '\n') break;
+        if(c == '\n') break;
         if(bufferCR)
         {
             string2_concat_char(string, '\r');
             bufferCR = false;
         }
+        if(c == ' ' || c == '\t' || c == EOF) break;
         if(c == '\r')
         {
             bufferCR = true;
@@ -122,6 +123,7 @@ void string2_readline(string2 *string, FILE *stream)
             string2_concat_char(string, '\r');
             bufferCR = false;
         }
+        if(c == EOF) break;
         if(c == '\r')
         {
             bufferCR = true;
