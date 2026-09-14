@@ -131,6 +131,18 @@ void string2_readline(string2 *string, FILE *stream)
     }
 }
 
+char string2_getchar(string2* string, size_t index)
+{
+    if(index >= string->length-1) return 0;
+    return string->string[index];
+}
+
+void string2_putchar(string2* string, size_t index, char c)
+{
+    if(index >= string->length-1) return;
+    string->string[index] = c;
+}
+
 // Private
 void allocate_blocks(string2* string, size_t size, bool re)
 {

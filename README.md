@@ -71,6 +71,17 @@ void string2_readline(string2 *string, FILE *stream);
 ```
 Just like readword, it reads a continious arry of characters into string2 `string` in a line from stream `stream`.  
 Similarly to above, a single carriage return `\r` NOT followed by a line feed `'\n'` will be read into the string2 `string`.  
+### Other stuff; Getter; Setter;
+```c
+char string2_getchar(string2* string, size_t index);
+```
+Returns the character at index `index` in string2 `string`.  
+If index is out of bounds, it returns NULL.
+```c
+void string2_putchar(string2* string, size_t index, char c);
+```
+Sets the character at index `index` to be character `c` in string2 `string`.  
+If index is out of bounds, it does nothing.  
 ### Zaping the string2 out of existence
 After you are done torturing string2s, you can finally put them out of their misery with
 ```c

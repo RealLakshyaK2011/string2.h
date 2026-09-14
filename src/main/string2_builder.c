@@ -1,5 +1,6 @@
 #include "string2.h/string2.h"
 #include <stdlib.h>
+#include <stdbool.h>
 
 // Functions Declarations
 void make_buffer(string2_builder* builder);
@@ -128,6 +129,53 @@ void string2_builder_build_string2(string2_builder *builder, string2 *str)
     }
 
     str->string[len-1] = '\0';
+}
+
+// Reader
+void string2_builder_readword(string2_builder *builder, FILE *stream)
+{
+    char c;
+    bool bufferCR = 0;
+
+    while(1)
+    {
+        c = fgetc(stream);
+        if(c == ' ' || c == '\t' || c == '\n') break;
+        if(bufferCR)
+        {
+            string2_builder_append_char(builder, '\r');
+            bufferCR = false;
+        }
+        if(c == '\r')
+        {
+            bufferCR = true;
+            continue;
+        }
+        string2_builder_append_char(builder, c);
+    }
+}
+
+void string2_builder_readline(string2_builder *builder, FILE *stream)
+{
+    char c;
+    bool bufferCR = 0;
+
+    while(1)
+    {
+        c = fgetc(stream);
+        if(c == '\n') break;
+        if(bufferCR)
+        {
+            string2_builder_append_char(builder, '\r');
+            bufferCR = false;
+        }
+        if(c == '\r')
+        {
+            bufferCR = true;
+            continue;
+        }
+        string2_builder_append_char(builder, c);
+    }
 }
 
 // Getter/Setter

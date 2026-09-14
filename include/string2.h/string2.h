@@ -38,6 +38,9 @@ char* string2_builder_build_cstring(string2_builder* builder, size_t* length);
 void  string2_builder_build_cstring_to(string2_builder* builder, char* cstring);
 void  string2_builder_build_string2(string2_builder* builder, string2* str);
 
+void string2_builder_readword(string2_builder* builder, FILE* stream);
+void string2_builder_readline(string2_builder* builder, FILE* stream);
+
 size_t string2_builder_get_length(string2_builder* builder);
 char   string2_builder_getchar(string2_builder* builder, size_t index);
 void   string2_builder_putchar(string2_builder* builder, size_t index, char c);
@@ -54,5 +57,8 @@ void string2_concat_string2(string2* string, string2* str2);
 
 void string2_readword(string2* string, FILE* stream);
 void string2_readline(string2* string, FILE* stream);
+
+char string2_getchar(string2* string, size_t index);
+void string2_putchar(string2* string, size_t index, char c);
 
 #endif
