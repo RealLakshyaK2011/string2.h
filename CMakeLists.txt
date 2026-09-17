@@ -19,5 +19,7 @@ target_sources(string2.h
 # Tests
 add_executable(strreadtest src/test/stringreadtest.c)
 add_executable(filereader src/test/filereader.c)
+add_executable(henry src/test/henry.c)
 target_link_libraries(strreadtest string2.h)
 target_link_libraries(filereader string2.h)
+target_link_libraries(henry string2.h)
