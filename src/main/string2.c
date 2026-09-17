@@ -20,7 +20,7 @@ void make_string2(string2 *string, const char *cstring)
 
 void make_string2_size(string2* string, size_t initsize)
 {
-    allocate_blocks(string, initsize, false);
+    allocate_blocks(string, initsize+1, false);
     string->string[0] = '\0';
     string->length = 0;
 }
@@ -71,7 +71,7 @@ void string2_concat_string2(string2 *string, string2 *str2)
 }
 
 // Reader
-void readcommon(string2 *string, FILE *stream, bool word)
+static void readcommon(string2 *string, FILE *stream, bool word)
 {
     char c;
     bool bufferCR = 0;

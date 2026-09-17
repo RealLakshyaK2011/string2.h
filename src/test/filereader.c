@@ -18,8 +18,8 @@ int main(int argc, char* argv[])
             continue;
         }
 
-        string2_builder_append_cstring_auto(&content, "Read file: ");
-        string2_builder_append_cstring_auto(&content, path);
+        string2_builder_append_cstring(&content, "Read file: ");
+        string2_builder_append_cstring(&content, path);
         string2_builder_append_char(&content, '\n');
         while(!feof(file))
         {

@@ -1,9 +1,9 @@
 #include "string2.h/string2.h"
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 // Functions Declarations
-void make_buffer(string2_builder* builder);
 void make_buffers(string2_builder* builder, uint n);
 
 // Public functions
@@ -13,7 +13,7 @@ void make_string2_builder(string2_builder* builder)
     builder->buffers_initialized = 1;
     builder->bbI = 0; builder->bI = 0;
     builder->bbuffer = malloc(sizeof(char*) * BBUFFER_STEP);
-    builder->bbuffer[0] = malloc(sizeof(char) * BUFFER_SIZE);
+    builder->bbuffer[0] = malloc(BUFFER_SIZE);
 }
 
 void dealloc_string2_builder(string2_builder *builder)
@@ -30,7 +30,7 @@ void string2_builder_append_char(string2_builder *builder, char c)
 {
     if(builder->bI >= BUFFER_SIZE)
     {
-        if(builder->bbI+1 >= builder->buffers_initialized) make_buffer(builder);
+        if(builder->bbI+1 >= builder->buffers_initialized) make_buffers(builder, 1);
         builder->bbI++; builder->bI = 0;
     }
     
@@ -38,16 +38,13 @@ void string2_builder_append_char(string2_builder *builder, char c)
     builder->bI++;
 }
 
-void string2_builder_append_cstring_auto(string2_builder* builder, char* cstring)
+void string2_builder_append_cstring(string2_builder* builder, const char* const cstring)
 {
-    size_t length = 0; char c;
-    while((c = cstring[length]) != '\0') length++;
-
-    string2_builder_append_cstring(builder, cstring, length);
+    string2_builder_append_pstring(builder, cstring, strlen(cstring));
 }
 
 // Length excludes null terminator '\0'
-void string2_builder_append_cstring(string2_builder *builder, char *cstring, size_t length)
+void string2_builder_append_pstring(string2_builder *builder, const char* const pstring, size_t length)
 {
     size_t t = length;
     t -= BUFFER_SIZE - builder->bI; // Space left in current buffer
@@ -61,7 +58,7 @@ void string2_builder_append_cstring(string2_builder *builder, char *cstring, siz
             builder->bbI++;
             builder->bI = 0;
         }
-        builder->bbuffer[builder->bbI][builder->bI] = cstring[i];
+        builder->bbuffer[builder->bbI][builder->bI] = pstring[i];
         builder->bI++;
     }
 }
@@ -69,7 +66,7 @@ void string2_builder_append_cstring(string2_builder *builder, char *cstring, siz
 void string2_builder_append_string2(string2_builder* builder, string2* str)
 {
     // Calculate required amount of buffers
-    size_t t = str->length - 1; // -1 excludes null terminator
+    size_t t = str->length;
     t -= BUFFER_SIZE - builder->bI; // Space left in current buffer
     t = t / BUFFER_SIZE + (t % BUFFER_SIZE == 0 ? 0 : 1); // Equivalent of doing roof on a float number
     make_buffers(builder, t);
@@ -90,7 +87,7 @@ void string2_builder_append_string2(string2_builder* builder, string2* str)
 char* string2_builder_build_cstring(string2_builder* builder, size_t* length)
 {
     size_t l = string2_builder_get_length(builder);
-    char* cstr = malloc(sizeof(char) * (l + 1));
+    char* cstr = malloc(l + 1);
     string2_builder_build_cstring_to(builder, cstr);
     if(length != NULL) *length = l+1;
     return cstr;
@@ -115,7 +112,7 @@ void string2_builder_build_cstring_to(string2_builder *builder, char* cstring)
 void string2_builder_build_string2(string2_builder *builder, string2 *str)
 {
     // +1 for null terminator '\0'
-    size_t len = string2_builder_get_length(builder) + 1;
+    size_t len = string2_builder_get_length(builder);
     make_string2_size(str, len);
 
     for(int i = 0; i <= builder->bbI; i++)
@@ -128,11 +125,11 @@ void string2_builder_build_string2(string2_builder *builder, string2 *str)
         }
     }
 
-    str->string[len-1] = '\0';
+    str->string[len] = '\0';
 }
 
 // Reader
-void string2_builder_readword(string2_builder *builder, FILE *stream)
+static void readcommon(string2_builder *builder, FILE *stream, bool word)
 {
     char c;
     bool bufferCR = 0;
@@ -146,7 +143,7 @@ void string2_builder_readword(string2_builder *builder, FILE *stream)
             string2_builder_append_char(builder, '\r');
             bufferCR = false;
         }
-        if(c == ' ' || c == '\t' || c == EOF) break;
+        if(c == EOF || (word && (c == ' ' || c == '\t'))) break;
         if(c == '\r')
         {
             bufferCR = true;
@@ -154,30 +151,16 @@ void string2_builder_readword(string2_builder *builder, FILE *stream)
         }
         string2_builder_append_char(builder, c);
     }
+}
+
+void string2_builder_readword(string2_builder *builder, FILE *stream)
+{
+    readcommon(builder, stream, true);
 }
 
 void string2_builder_readline(string2_builder *builder, FILE *stream)
 {
-    char c;
-    bool bufferCR = 0;
-
-    while(1)
-    {
-        c = fgetc(stream);
-        if(c == '\n') break;
-        if(bufferCR)
-        {
-            string2_builder_append_char(builder, '\r');
-            bufferCR = false;
-        }
-        if(c == EOF) break;
-        if(c == '\r')
-        {
-            bufferCR = true;
-            continue;
-        }
-        string2_builder_append_char(builder, c);
-    }
+    readcommon(builder, stream, false);
 }
 
 // Getter/Setter
@@ -186,9 +169,13 @@ size_t string2_builder_get_length(string2_builder* builder)
     return builder->bbI * BUFFER_SIZE + builder->bI;
 }
 
-char string2_builder_getchar(string2_builder* builder, size_t index)
+char string2_builder_getchar(string2_builder* builder, size_t index, bool* outofbounds)
 {
-    if(index >= string2_builder_get_length(builder)) return 0;
+    if(index >= string2_builder_get_length(builder))
+    {
+       if(outofbounds != NULL) *outofbounds = true;
+       return 0; 
+    }
     return builder->bbuffer[index/BUFFER_SIZE][index%BUFFER_SIZE];
 }
 
@@ -200,19 +187,6 @@ void string2_builder_putchar(string2_builder* builder, size_t index, char c)
 
 
 // Private functions: buffer initialization
-void make_buffer(string2_builder* builder)
-{
-    if(builder->buffers_initialized + 1 > builder->bbuffer_size)
-    {
-        builder->bbuffer_size += BBUFFER_STEP;
-        builder->bbuffer = realloc(builder->bbuffer, sizeof(char*) * builder->bbuffer_size);
-    }
-
-    size_t buffer_index = builder->buffers_initialized;
-    builder->bbuffer[buffer_index] = malloc(sizeof(char) * BUFFER_SIZE);
-    builder->buffers_initialized++;
-}
-
 void make_buffers(string2_builder* builder, uint n)
 {
     if(n == 0) return;
@@ -227,7 +201,7 @@ void make_buffers(string2_builder* builder, uint n)
     for(int i = 0; i < n; i++)
     {
         size_t buffer_index = builder->buffers_initialized;
-        builder->bbuffer[buffer_index] = malloc(sizeof(char) * BUFFER_SIZE);
+        builder->bbuffer[buffer_index] = malloc(BUFFER_SIZE);
         builder->buffers_initialized++;
     }
 }
