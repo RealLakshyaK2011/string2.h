@@ -45,12 +45,12 @@ void string2_concat_char(string2* string, char c)
     string->length++;
 }
 
-void string2_concat_cstring(string2* string, char* cstring)
+void string2_concat_cstring(string2* string, const char* const cstring)
 {
     string2_concat_pstring(string, cstring, strlen(cstring));
 }
 
-void string2_concat_pstring(string2 *string, char *pstring, size_t length)
+void string2_concat_pstring(string2* string, const char* const pstring, size_t length)
 {
     size_t strlen = string->length;
     if(strlen + length + 1 > string->allocated) allocate_blocks(string, length, true); // +1 for null term
@@ -107,9 +107,9 @@ void string2_readline(string2 *string, FILE *stream)
 
 char string2_getchar(string2* string, size_t index, bool* outofbounds)
 {
-    if(outofbounds != NULL && index >= string->length)
+    if(index >= string->length)
     {
-        *outofbounds = true;
+        if(outofbounds != NULL) *outofbounds = true;
         return 0;
     }
     return string->string[index];
